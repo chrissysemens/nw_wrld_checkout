@@ -74,6 +74,7 @@ class VeilBloom extends BaseThreeJsModule {
     super(container);
     if (!THREE) return;
 
+    this.moduleGroup = new THREE.Group();
     this.veilGroup = new THREE.Group();
     this.veilUniforms = [];
     this.veilBloomState = { timer: 0, duration: 0, scale: 1 };
@@ -99,15 +100,17 @@ class VeilBloom extends BaseThreeJsModule {
     this.scene.fog = new THREE.FogExp2("#040507", 0.015);
 
     const hemi = new THREE.HemisphereLight(0xb4ceff, 0x0b0f15, 0.5);
-    this.scene.add(hemi);
+    this.moduleGroup.add(hemi);
     const fill = new THREE.DirectionalLight(0xfff1d7, 0.4);
     fill.position.set(4, 6, 2);
-    this.scene.add(fill);
+    this.moduleGroup.add(fill);
 
     this.camera.position.set(0, 2.5, 14);
 
     this.buildVeils();
     this.createPollen();
+
+    this.setModel(this.moduleGroup);
   }
 
   buildVeils() {
@@ -180,7 +183,7 @@ class VeilBloom extends BaseThreeJsModule {
       this.veilUniforms.push(uniforms);
     }
 
-    this.scene.add(this.veilGroup);
+    this.moduleGroup.add(this.veilGroup);
   }
 
   createPollen() {
@@ -243,7 +246,7 @@ class VeilBloom extends BaseThreeJsModule {
     });
 
     this.pollenSystem = new THREE.Points(this.pollenGeometry, this.pollenMaterial);
-    this.scene.add(this.pollenSystem);
+    this.moduleGroup.add(this.pollenSystem);
   }
 
   animateLoop(delta) {
@@ -320,8 +323,8 @@ class VeilBloom extends BaseThreeJsModule {
   }
 
   destroy() {
-    if (this.scene && this.veilGroup) {
-      this.scene.remove(this.veilGroup);
+    if (this.veilGroup) {
+      this.moduleGroup?.remove(this.veilGroup);
       this.veilGroup.children.forEach((mesh) => {
         mesh.geometry.dispose();
         mesh.material.dispose();
@@ -330,10 +333,14 @@ class VeilBloom extends BaseThreeJsModule {
       this.veilUniforms = [];
     }
     if (this.pollenSystem) {
-      this.scene.remove(this.pollenSystem);
+      this.moduleGroup?.remove(this.pollenSystem);
       this.pollenGeometry?.dispose();
       this.pollenMaterial?.dispose();
       this.pollenSystem = null;
+    }
+    if (this.moduleGroup) {
+      this.moduleGroup.clear();
+      this.moduleGroup = null;
     }
     super.destroy();
   }
