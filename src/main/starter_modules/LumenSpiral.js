@@ -170,7 +170,7 @@ class LumenSpiral extends BaseThreeJsModule {
       positions[i * 3] = 0;
       positions[i * 3 + 1] = -999;
       positions[i * 3 + 2] = 0;
-      const clr = paletteDefs[this.currentPaletteKey].core.clone();
+      const clr = new THREE.Color(paletteDefs[this.currentPaletteKey].core);
       colors[i * 3] = clr.r;
       colors[i * 3 + 1] = clr.g;
       colors[i * 3 + 2] = clr.b;
