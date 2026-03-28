@@ -66,6 +66,7 @@ class SeismicVault extends BaseThreeJsModule {
     super(container);
     if (!THREE) return;
 
+    this.moduleGroup = new THREE.Group();
     this.ribCount = 18;
     this.ribs = [];
     this.ribTargets = [];
@@ -98,10 +99,10 @@ class SeismicVault extends BaseThreeJsModule {
     this.scene.fog = new THREE.FogExp2("#040404", 0.03);
 
     const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-    this.scene.add(ambient);
+    this.moduleGroup.add(ambient);
     const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
     rimLight.position.set(-4, 8, 10);
-    this.scene.add(rimLight);
+    this.moduleGroup.add(rimLight);
 
     this.camera.position.set(0, 4, 18);
 
@@ -109,6 +110,8 @@ class SeismicVault extends BaseThreeJsModule {
     this.createDustSystem();
     this.createStrobe();
     this.createCrackMesh();
+
+    this.setModel(this.moduleGroup);
   }
 
   buildVault() {
@@ -131,7 +134,7 @@ class SeismicVault extends BaseThreeJsModule {
       this.ribTargets.push({ offset: 0, velocity: 0 });
     }
 
-    this.scene.add(this.ribGroup);
+    this.moduleGroup.add(this.ribGroup);
 
     const floorGeometry = new THREE.PlaneGeometry(30, 30);
     const floorMaterial = new THREE.MeshStandardMaterial({
@@ -142,7 +145,7 @@ class SeismicVault extends BaseThreeJsModule {
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -3.2;
-    this.scene.add(floor);
+    this.moduleGroup.add(floor);
   }
 
   createDustSystem() {
@@ -196,13 +199,13 @@ class SeismicVault extends BaseThreeJsModule {
     });
 
     this.dustSystem = new THREE.Points(this.dustGeometry, this.dustMaterial);
-    this.scene.add(this.dustSystem);
+    this.moduleGroup.add(this.dustSystem);
   }
 
   createStrobe() {
     this.strobeLight = new THREE.SpotLight(0xffffff, 0, 30, Math.PI / 4, 0.5, 1.5);
     this.strobeLight.position.set(0, 6, 4);
-    this.scene.add(this.strobeLight);
+    this.moduleGroup.add(this.strobeLight);
   }
 
   createCrackMesh() {
@@ -216,7 +219,7 @@ class SeismicVault extends BaseThreeJsModule {
     this.crackMesh = new THREE.Mesh(geometry, material);
     this.crackMesh.rotation.x = -Math.PI / 2;
     this.crackMesh.position.set(0, -3.19, 0);
-    this.scene.add(this.crackMesh);
+    this.moduleGroup.add(this.crackMesh);
   }
 
   animateLoop(delta) {
@@ -362,13 +365,13 @@ class SeismicVault extends BaseThreeJsModule {
 
   destroy() {
     if (this.dustSystem) {
-      this.scene.remove(this.dustSystem);
+      this.moduleGroup?.remove(this.dustSystem);
       this.dustGeometry?.dispose();
       this.dustMaterial?.dispose();
       this.dustSystem = null;
     }
     if (this.ribGroup) {
-      this.scene.remove(this.ribGroup);
+      this.moduleGroup?.remove(this.ribGroup);
       this.ribs.forEach((rib) => {
         if (rib) {
           rib.geometry.dispose();
@@ -378,14 +381,18 @@ class SeismicVault extends BaseThreeJsModule {
       this.ribs = [];
     }
     if (this.crackMesh) {
-      this.scene.remove(this.crackMesh);
+      this.moduleGroup?.remove(this.crackMesh);
       this.crackMesh.geometry.dispose();
       this.crackMesh.material.dispose();
       this.crackMesh = null;
     }
     if (this.strobeLight) {
-      this.scene.remove(this.strobeLight);
+      this.moduleGroup?.remove(this.strobeLight);
       this.strobeLight = null;
+    }
+    if (this.moduleGroup) {
+      this.moduleGroup.clear();
+      this.moduleGroup = null;
     }
     super.destroy();
   }
